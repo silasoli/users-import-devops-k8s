@@ -1,0 +1,145 @@
+name: users-import
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: users-import-api:local
+    container_name: users-import-api
+    restart: unless-stopped
+    environment:
+      APP_MODE: api
+      PORT: 3000
+      API_PREFIX: ""
+      TRUST_PROXY: "false"
+      CORS_ORIGINS: "http://localhost:3000"
+      MONGO_URI: "mongodb://mongo:27017/users_db"
+      MONGO_USERNAME: "admin"
+      MONGO_PASSWORD: "admin123"
+      MONGO_AUTH_SOURCE: "admin"
+      RABBITMQ_URL: "amqp://appuser:apppass@rabbitmq:5672"
+      RABBITMQ_QUEUE: "import-users.queue"
+      RABBITMQ_PREFETCH: "20"
+      REDIS_URL: "redis://:redis123@redis:6379"
+      REDIS_PASSWORD: "redis123"
+      SWAGGER_ENABLED: "true"
+      SWAGGER_PATH: "docs"
+      SWAGGER_TITLE: "Users Import API"
+      SWAGGER_DESCRIPTION: "Users CRUD + async import API"
+      SWAGGER_VERSION: "1.0.0"
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker:
+    image: users-import-api:local
+    container_name: users-import-worker
+    command: ["node", "dist/main"]
+    restart: unless-stopped
+    environment:
+      APP_MODE: worker
+      PORT: 3000
+      API_PREFIX: ""
+      TRUST_PROXY: "false"
+      CORS_ORIGINS: "http://localhost:3000"
+      MONGO_URI: "mongodb://mongo:27017/users_db"
+      MONGO_USERNAME: "admin"
+      MONGO_PASSWORD: "admin123"
+      MONGO_AUTH_SOURCE: "admin"
+      RABBITMQ_URL: "amqp://appuser:apppass@rabbitmq:5672"
+      RABBITMQ_QUEUE: "import-users.queue"
+      RABBITMQ_PREFETCH: "20"
+      REDIS_URL: "redis://:redis123@redis:6379"
+      REDIS_PASSWORD: "redis123"
+      SWAGGER_ENABLED: "false"
+      SWAGGER_PATH: "docs"
+      SWAGGER_TITLE: "Users Import API"
+      SWAGGER_DESCRIPTION: "Users CRUD + async import API"
+      SWAGGER_VERSION: "1.0.0"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    container_name: users-import-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "admin"
+      MONGO_INITDB_ROOT_PASSWORD: "admin123"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --username admin --password admin123 --authenticationDatabase admin --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: users-import-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "redis123"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123", "PING"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: users-import-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: "appuser"
+      RABBITMQ_DEFAULT_PASS: "apppass"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: users-import-mongo-express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "admin"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "admin123"
+      ME_CONFIG_MONGODB_SERVER: "mongo"
+      ME_CONFIG_MONGODB_PORT: "27017"
+      ME_CONFIG_MONGODB_AUTH_DATABASE: "admin"
+      ME_CONFIG_BASICAUTH_USERNAME: "admin"
+      ME_CONFIG_BASICAUTH_PASSWORD: "admin123"
+    ports:
+      - "8081:8081"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
+  redis_data:
+  rabbitmq_data:
