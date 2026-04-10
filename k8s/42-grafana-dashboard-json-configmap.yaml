@@ -1,0 +1,133 @@
+﻿apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-users-import
+  namespace: users-import
+data:
+  users-import-runtime.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "sum(process_resident_memory_bytes{app=\"users-import-api\"})",
+              "refId": "A"
+            }
+          ],
+          "title": "Resident Memory (bytes)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "sum(rate(process_cpu_seconds_total{app=\"users-import-api\"}[1m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Usage (cores)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "sum(rate(app_http_requests_total{app=\"users-import-api\"}[1m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "HTTP Requests/s",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(app_http_request_duration_seconds_bucket{app=\"users-import-api\"}[5m])) by (le))",
+              "refId": "A"
+            }
+          ],
+          "title": "HTTP Latency p95 (s)",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 39,
+      "style": "dark",
+      "tags": ["users-import", "nestjs"],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "timezone": "",
+      "title": "Users Import API - Runtime",
+      "uid": "users-import-runtime",
+      "version": 1,
+      "weekStart": ""
+    }
+
+

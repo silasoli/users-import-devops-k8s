@@ -1,0 +1,117 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-import-worker
+  namespace: users-import
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-import-worker
+  template:
+    metadata:
+      labels:
+        app: users-import-worker
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: worker
+          image: docker.io/silasoli/users-import-api:latest
+          imagePullPolicy: Always
+          command: ["node", "dist/main"]
+          env:
+            - name: APP_MODE
+              value: "worker"
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: PORT
+            - name: API_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: API_PREFIX
+            - name: TRUST_PROXY
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: TRUST_PROXY
+            - name: CORS_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: CORS_ORIGINS
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: MONGO_URI
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: MONGO_USERNAME
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: MONGO_PASSWORD
+            - name: MONGO_AUTH_SOURCE
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: MONGO_AUTH_SOURCE
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: RABBITMQ_URL
+            - name: RABBITMQ_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: RABBITMQ_QUEUE
+            - name: RABBITMQ_PREFETCH
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: RABBITMQ_PREFETCH
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: REDIS_URL
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: REDIS_PASSWORD
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: REDIS_PORT
+            - name: SWAGGER_ENABLED
+              value: "false"
+            - name: SWAGGER_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_PATH
+            - name: SWAGGER_TITLE
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_TITLE
+            - name: SWAGGER_DESCRIPTION
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_DESCRIPTION
+            - name: SWAGGER_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_VERSION
+

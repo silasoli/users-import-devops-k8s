@@ -114,3 +114,20 @@ docker compose down -v
 Com `SWAGGER_ENABLED=true`:
 
 - `http://localhost:3000/docs`
+
+## Kubernetes (desafio)
+
+Os manifests para subir o projeto no Kubernetes estao em `k8s/`.
+
+Guia passo a passo:
+
+- `k8s/README.md`
+
+Quick start Minikube:
+
+```bash
+minikube start --driver=docker --cpus=4 --memory=6144
+minikube kubectl -- apply -f k8s/
+minikube kubectl -- get pods -n users-import
+minikube ip
+```

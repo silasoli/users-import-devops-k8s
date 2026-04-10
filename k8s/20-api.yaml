@@ -1,0 +1,155 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-import-api
+  namespace: users-import
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: users-import-api
+  template:
+    metadata:
+      labels:
+        app: users-import-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "3000"
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: api
+          image: docker.io/silasoli/users-import-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_MODE
+              value: "api"
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: PORT
+            - name: API_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: API_PREFIX
+            - name: TRUST_PROXY
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: TRUST_PROXY
+            - name: CORS_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: CORS_ORIGINS
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: MONGO_URI
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: MONGO_USERNAME
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: MONGO_PASSWORD
+            - name: MONGO_AUTH_SOURCE
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: MONGO_AUTH_SOURCE
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: RABBITMQ_URL
+            - name: RABBITMQ_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: RABBITMQ_QUEUE
+            - name: RABBITMQ_PREFETCH
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: RABBITMQ_PREFETCH
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: REDIS_URL
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: users-import-secrets
+                  key: REDIS_PASSWORD
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: REDIS_PORT
+            - name: SWAGGER_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_ENABLED
+            - name: SWAGGER_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_PATH
+            - name: SWAGGER_TITLE
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_TITLE
+            - name: SWAGGER_DESCRIPTION
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_DESCRIPTION
+            - name: SWAGGER_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: users-import-app-config
+                  key: SWAGGER_VERSION
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-import-api
+  namespace: users-import
+spec:
+  type: NodePort
+  selector:
+    app: users-import-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+      nodePort: 30080
+
