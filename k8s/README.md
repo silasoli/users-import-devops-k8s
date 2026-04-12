@@ -89,3 +89,29 @@ minikube kubectl -- logs -n users-import deploy/users-import-worker --tail=200
 - troque senhas do `Secret`
 - use tag imutavel da imagem (`:v1.0.0`)
 - mantenha apenas Grafana exposto externamente no cluster
+
+## 9) Parar ambiente Minikube
+
+Parar cluster (mantem estado para subir depois):
+
+```bash
+minikube stop
+```
+
+Subir novamente:
+
+```bash
+minikube start
+```
+
+Apagar cluster e todos os recursos (reset total):
+
+```bash
+minikube delete
+```
+
+Se quiser remover apenas os recursos da aplicacao e manter o cluster:
+
+```bash
+minikube kubectl -- delete namespace users-import
+```
