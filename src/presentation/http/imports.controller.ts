@@ -1,11 +1,19 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateUsersImportJobUseCase } from '../../application/imports/use-cases/create-users-import-job.usecase';
 import { GetImportJobUseCase } from '../../application/imports/use-cases/get-import-job.usecase';
+import { ListImportJobsUseCase } from '../../application/imports/use-cases/list-import-jobs.usecase';
 import { ListImportJobErrorsUseCase } from '../../application/imports/use-cases/list-import-job-errors.usecase';
 import { CreateUsersImportJobDto } from './dtos/create-users-import-job.dto';
 import { IdMongoParamDto } from './dtos/id-mongo-param.dto';
 import { ImportJobErrorsPageResponseDto } from './dtos/import-job-errors-page-response.dto';
+import { ImportJobsPageResponseDto } from './dtos/import-jobs-page-response.dto';
 import { ImportJobResponseDto } from './dtos/import-job-response.dto';
 import { PaginationQueryDto } from './dtos/pagination-query.dto';
 
@@ -15,6 +23,7 @@ export class ImportsController {
   constructor(
     private readonly createUsersImportJobUseCase: CreateUsersImportJobUseCase,
     private readonly getImportJobUseCase: GetImportJobUseCase,
+    private readonly listImportJobsUseCase: ListImportJobsUseCase,
     private readonly listImportJobErrorsUseCase: ListImportJobErrorsUseCase,
   ) {}
 
@@ -22,9 +31,25 @@ export class ImportsController {
   @ApiBody({ type: CreateUsersImportJobDto })
   @ApiOkResponse({ type: ImportJobResponseDto })
   @Post('users')
-  async createUsersImport(@Body() dto: CreateUsersImportJobDto): Promise<ImportJobResponseDto> {
+  async createUsersImport(
+    @Body() dto: CreateUsersImportJobDto,
+  ): Promise<ImportJobResponseDto> {
     const job = await this.createUsersImportJobUseCase.execute(dto);
     return new ImportJobResponseDto(job);
+  }
+
+  @ApiOperation({ summary: 'Listar jobs de importacao com paginacao' })
+  @ApiOkResponse({ type: ImportJobsPageResponseDto })
+  @Get()
+  async list(
+    @Query() query: PaginationQueryDto,
+  ): Promise<ImportJobsPageResponseDto> {
+    const page = await this.listImportJobsUseCase.execute({
+      page: query.page ?? 1,
+      limit: query.limit ?? 20,
+    });
+
+    return new ImportJobsPageResponseDto(page);
   }
 
   @ApiOperation({ summary: 'Buscar job de importacao por id' })
@@ -35,7 +60,9 @@ export class ImportsController {
   })
   @ApiOkResponse({ type: ImportJobResponseDto })
   @Get(':id')
-  async getById(@Param() params: IdMongoParamDto): Promise<ImportJobResponseDto> {
+  async getById(
+    @Param() params: IdMongoParamDto,
+  ): Promise<ImportJobResponseDto> {
     const job = await this.getImportJobUseCase.execute(params.id);
     return new ImportJobResponseDto(job);
   }

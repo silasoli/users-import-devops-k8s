@@ -32,6 +32,7 @@ import { UpdateUserUseCase } from './application/users/use-cases/update-user.use
 import { DeleteUserUseCase } from './application/users/use-cases/delete-user.usecase';
 import { CreateUsersImportJobUseCase } from './application/imports/use-cases/create-users-import-job.usecase';
 import { GetImportJobUseCase } from './application/imports/use-cases/get-import-job.usecase';
+import { ListImportJobsUseCase } from './application/imports/use-cases/list-import-jobs.usecase';
 import { ListImportJobErrorsUseCase } from './application/imports/use-cases/list-import-job-errors.usecase';
 import { ProcessImportUserRowUseCase } from './application/imports/use-cases/process-import-user-row.usecase';
 import { UsersController } from './presentation/http/users.controller';
@@ -123,6 +124,7 @@ import { HealthService } from './infrastructure/health.service';
     DeleteUserUseCase,
     CreateUsersImportJobUseCase,
     GetImportJobUseCase,
+    ListImportJobsUseCase,
     ListImportJobErrorsUseCase,
     ProcessImportUserRowUseCase,
   ],

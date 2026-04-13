@@ -7,6 +7,7 @@ import {
   ImportJobStatus,
 } from '../../../../domain/imports/import-job.entity';
 import { ImportJobRepository } from '../../../../domain/imports/import-job.repository';
+import { PageResult } from '../../../../shared/types/pagination';
 import {
   ImportJobDocument,
   ImportJobMongo,
@@ -39,6 +40,31 @@ export class MongoImportJobRepository implements ImportJobRepository {
 
     const doc = await this.importJobModel.findById(new Types.ObjectId(id));
     return doc ? this.toEntity(doc) : null;
+  }
+
+  async list(params: {
+    page: number;
+    limit: number;
+  }): Promise<PageResult<ImportJobEntity>> {
+    const page = Math.max(1, params.page);
+    const limit = Math.min(200, Math.max(1, params.limit));
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await Promise.all([
+      this.importJobModel
+        .find({})
+        .sort({ created_at: -1 })
+        .skip(skip)
+        .limit(limit),
+      this.importJobModel.countDocuments({}),
+    ]);
+
+    return {
+      items: items.map((item) => this.toEntity(item)),
+      total,
+      page,
+      limit,
+    };
   }
 
   async incrementProgress(

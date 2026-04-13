@@ -9,6 +9,7 @@ import { PageResult } from '../../shared/types/pagination';
 export interface ImportJobRepository {
   create(input: CreateImportJobInput): Promise<ImportJobEntity>;
   findById(id: string): Promise<ImportJobEntity | null>;
+  list(params: { page: number; limit: number }): Promise<PageResult<ImportJobEntity>>;
   incrementProgress(
     id: string,
     outcome: 'success' | 'error',

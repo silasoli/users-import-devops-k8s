@@ -1,0 +1,38 @@
+@baseUrl = http://127.0.0.1:3000
+
+### Health live
+GET {{baseUrl}}/health/live
+
+### Health ready
+GET {{baseUrl}}/health/ready
+
+### List import jobs
+GET {{baseUrl}}/imports?page=1&limit=20
+
+### Create users import job (capture id from response)
+POST {{baseUrl}}/imports/users
+Content-Type: application/json
+
+{
+  "filename": "manual-import.http",
+  "rows": [
+    {
+      "name": "Teste Um",
+      "email": "teste.um+http@stress.local",
+      "document": "11111111111",
+      "external_ref": "http-1"
+    },
+    {
+      "name": "Teste Dois",
+      "email": "teste.dois+http@stress.local",
+      "document": "22222222222",
+      "external_ref": "http-2"
+    }
+  ]
+}
+
+### Get import job by id
+GET {{baseUrl}}/imports/{{jobId}}
+
+### List import errors by id
+GET {{baseUrl}}/imports/{{jobId}}/errors?page=1&limit=20
