@@ -123,6 +123,11 @@ Guia passo a passo:
 
 - `k8s/README.md`
 
+Pipeline (GitHub Actions):
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/docker-publish.yml`
+
 Quick start Minikube:
 
 ```bash

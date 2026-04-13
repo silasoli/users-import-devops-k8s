@@ -90,7 +90,28 @@ minikube kubectl -- logs -n users-import deploy/users-import-worker --tail=200
 - use tag imutavel da imagem (`:v1.0.0`)
 - mantenha apenas Grafana exposto externamente no cluster
 
-## 9) Parar ambiente Minikube
+## 9) Pipeline de entrega com GitHub Actions
+
+Workflows criados em `.github/workflows`:
+
+- `ci.yml`: instala dependencias e roda `npm run build` em push/PR
+- `docker-publish.yml`: build e push da imagem no Docker Hub
+
+Secrets necessarios no GitHub:
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+
+Observacao:
+
+- O pipeline publica imagem no Docker Hub automaticamente.
+- O deploy no Minikube e manual:
+
+```bash
+minikube kubectl -- apply -f k8s/
+```
+
+## 10) Parar ambiente Minikube
 
 Parar cluster (mantem estado para subir depois):
 
