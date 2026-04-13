@@ -92,10 +92,9 @@ minikube kubectl -- logs -n users-import deploy/users-import-worker --tail=200
 
 ## 9) Pipeline de entrega com GitHub Actions
 
-Workflows criados em `.github/workflows`:
+Workflow criado em `.github/workflows`:
 
-- `ci.yml`: instala dependencias e roda `npm run build` em push/PR
-- `docker-publish.yml`: build e push da imagem no Docker Hub
+- `ci-cd.yml`: pipeline unico com job de CI (build) e job de Docker Publish
 
 Secrets necessarios no GitHub:
 

@@ -125,8 +125,7 @@ Guia passo a passo:
 
 Pipeline (GitHub Actions):
 
-- `.github/workflows/ci.yml`
-- `.github/workflows/docker-publish.yml`
+- `.github/workflows/ci-cd.yml`
 
 Quick start Minikube:
 
